@@ -1,0 +1,4 @@
+main2.o: main2.c
+main.o: main.c
+mainTest.o: mainTest.c
+mul.o: mul.c
