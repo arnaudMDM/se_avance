@@ -1,0 +1,62 @@
+doc:gcc manual
+	intel instruction set reference
+	votre sujet p 15-16
+
+astuce:gcc -S
+	gdb "disassembale"
+	objdump -d
+
+Makefile: option -ansi indique que l'on travaille avce le standard. les fonctions asm ne fonctionnent pas.
+
+
+ex1 
+	setjmp(buf) permet de sauvegarder un branchement (adresse de retour + qqc) et retourne 0
+	longjump(buf,var) retourne à l'adresse sauvegardée en retournant la variable var(si var vaut à, 	on retourne 1).
+
+	toutes les variables déclarés avant le jump gardent les modifications apportés dans les deux cas.
+ex2
+	le longjmp() devrait ne pas revenir à la procédure qui n'existe plus. Le programme aurait du 		planter mais ça marche.
+	Rq:lea:commande assembleur (load effective address)
+	Rq: layout split donne la vue assembleur et source dans gdb et focus asm permet de se concentrer 		sur asm
+	Rq:stepi pour faire étape par étape a niveau de l'assembleur
+
+code asm:
+	 Les générales registers utilisés sont eax,ebx,ecx,edx,esi,edi où esi et edi sont des index registers(on ne peut les utiliser avec toutes les instructions). ebp et edp sont des générales registers pour intel mais pas pour gcc.
+
+	int
+	main(void)
+	{
+		int x = 10, y;
+		asm ("movl %1, %%egt" "\n\t" "movl %%egt, %0"
+		: "=r"(y) /* y is output operand (si pas d'output mettre quand même :)*/
+		: "r"(x) /* x is input operand (si pas d'input mettre quand même :)*/
+		: "%eax","%ebx"); /* %eax is a clobbered register */
+	}
+
+	=r signifie que l'on met le registre de sortie dans y.
+	r signifie que l'on met x dans le registre en entrée
+
+	%chiffre indique que l'on veut travailler avec un registre mais que le choix du registre est effectué par le compilateur. %%truc indique que le compilateur ne doit pas trouver un registre mais doit travailler avec le registre écrit même si il ne correspond à rien.
+	On peut interdire au compilateur de choisir certains registres pour les %chiffres.
+	Après le code asm, le compilateur sauvegarde les valeurs des registres choisis par le compilateur des %chiffre dans la pile.
+
+	"%eax","%ebx" indique au compilateur que les registres qu'il doit choisir ne doit pas être un registre de cette liste.
+
+	quand on appelle une fonction, call sauvegarde implicitement les paramètres de la fonction appelant utilisé dans la fonction appelé. call sauvegarde aussi implicitement %eip qui possède l'instruction à être exécuter à la fin de la fonction appelé. %esp pointe sur %eip.
+	Au début de la fonction appelé, on push %ebp(%esp pointe dessus). %ebp pointe sur la valeur de l'ancien %ebp.
+
+	Si on a deux variables locales d'une fonction qui est appelé, le compilateur stocke la première variable à l'adresse la plus basse. Il stocke la deuxième variable à une adresse de quatre octets plus grande. Une focntion appelée est quant à elle stockée à une adresse plus basse que l'adresse appelante.
+
+	Une adresse de la pile représente un octet.
+
+
+scanf:quand l'entrée n'est pas correcte, le buffer n'est pas vidé.
+
+Contexte d'exécution:
+	On avait remarqué que la différence l'adresse du registre %esp de la fonction appelante et l'adresse du registre %ebp de la fonction %ebp était de 8 octets. On avait également remarqué que la différence entre l'adresse du registre %ebp et %esp d'un appel de fonction était de 40 octets pour la fonction appelé est toujours la même fonction. Cela signifie que le compilateur, il évalue au début de l'exécution de la fonction le nombre d'octets à allouer à la pile. La différence n'est pas la même avec la fonction main car les besoins d'allocation ne sont pas les mêmes.
+
+	
+
+	Si dans une fonction, aucune variable locale n'est décalré et donc qu'il 'y a aucune manipulation de la pile, alors %esp pointe toujours sur la même valeur que %ebp. Le compilateur ne fait pas leave à la fin de la fonction car leave fait move %ebp,%esp et pop %ebp. La première instruction ne sert à rien, donc le compilateur fait juste pop %ebp.
+
+	Par convention, les valeurs de retour sont stockées dans %eax.

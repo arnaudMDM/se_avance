@@ -1,0 +1,26 @@
+%esp = stack pointer. it is implicitly used by several CPU instructions(push,pop,call and ret among others.		it always points to the last element used on the stack(not the first free element).
+	the "top of the stack" is an occupied location, not a free one, and is at the lowest memory address.
+
+%ebp = base pointer. it is used to reference all the function parameters and local variables in the 		current stack frame. unlike the %esp register, the base pointer is maipulated only explicitly. this is 		sometimes called the "frame pointer"
+
+%eip = intruction pointer. this holds the adress of the next CPU instruction to be executed, and it's 		saved onto the stack as part of the call instrction. As well, any "jump" instructions modify the %eip 	  directly.
+
+%eax,%ebx,%ecx,%edx = general register
+
+%esi,%edi = index register
+
+movb,movw,movl,movq reference for byte, word,dword and qword (8,16,32,64).
+
+la pile ne monte pas, elle descend.
+
+movl (%esp),%eax //on met la valeur l'octet de la pile pointé par l'adresse qui est la valeur du registre esp dans le registre %eax.
+
+movl %esp,%eax //on met la valeur du registre %esp dans le registre %eax.
+
+leave=move %ebp,%esp et pop %ebp
+ret=pop %eip.
+on ne peut pas modifier directement %eip.
+
+pop %ebp= %ebp prend la valeur pointée par %esp. La pile est décrémentée de 1.
+
+
